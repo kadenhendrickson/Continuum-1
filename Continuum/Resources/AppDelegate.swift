@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import CloudKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -15,7 +15,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    // Override point for customization after application launch.
+    
+    func checkAccountStatus(completion: @escaping (Bool) -> Void){
+    CKContainer.default().accountStatus { (accountStatus, error) in
+        if let error = error {
+            print("😝 There was an error in \(#function) : \(error) : \(error.localizedDescription) 😝")
+            return
+        }
+        DispatchQueue.main.async {
+        
+        switch accountStatus {
+        case .available:
+            completion(true)
+        case .couldNotDetermine:
+            self.window?.rootViewController?.presentSimpleAlertWith(title: "Could not determine account status", message: "rip")
+            completion(false); return
+        case .noAccount:
+            self.window?.rootViewController?.presentSimpleAlertWith(title: "No Account with this account info", message: "big rip")
+            completion(false); return
+        case .restricted:
+            self.window?.rootViewController?.presentSimpleAlertWith(title: "This account is restricted and cannot be accessed", message: "biggest rip")
+            completion(false); return
+            }
+        }
+    }
+        
+        
+}
+    checkAccountStatus { (_) in
+      return true
+    }
+    
     return true
   }
 
@@ -43,4 +73,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
+
 
